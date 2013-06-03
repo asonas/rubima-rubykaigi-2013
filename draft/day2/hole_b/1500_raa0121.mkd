@@ -1,0 +1,4 @@
+# How NougakuDo connect Windows Azure and Rails Application
+
+## Windows Azure Overview
+Windows Azure(以下Azure)は
