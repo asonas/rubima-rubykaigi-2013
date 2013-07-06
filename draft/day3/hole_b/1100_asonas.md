@@ -13,17 +13,21 @@ http://www.ustream.tv/recorded/33609885
 多くの人が使っているRailsはRESTfulな設計、開発ができるように開発されています。
 そのRailsをよりRESTfulに扱うために7つのパターンを記載しているブログをもとにその中から、いくつか私達がよく使うパターンについて発表されました。
 
+## Railsを使うこと
+RailsはRESTfulなフレームワークであると、DHHが7年前に言っていた。
+たとえばどういうところがRESTfulであるかというと
 
-## RailsはRESTful
-
-DHHが7年前にRailsはRESTfulであると言っていた。
-
+```
 resources :users
+```
 
 と書くことによってCRUDに必要なものができてくる
 
 
-## Railsを使うこと
+| resource | GET | POST | PUT | DELETE |
+| --- |--- |--- | --- | --- |
+| /users | users#index | users#create  | - | - |
+| /users/:id  | users#show | - | users#update | users#destroy |
 
 Railsを使う時点で私達が重要視しなければならないことは、その設計がRESTfulであるか？ということだと思います。
 その中でパターンにできるほど良く使うものを紹介されていました。
@@ -47,50 +51,32 @@ Railsにうまく乗っかることができればRailsエンジニアはリソ�
 同じくDHHは「制約が自由をもたらす」と言っていた。とてもいい言葉だが、その制約でもやはり難しいものがある。
 それは
 
-認証
-検索
-状態経か
-手続き的
-リスト
-ウィザード系の画面
+* 認証
+* 検索
+* 状態経か
+* 手続き的
+* リスト
+* ウィザード系の画面
 
-こういうのをどうやってresources で表現するのか？
+こういうのをどうやってresources で表現するのは今までに述べたものでは一筋縄ではいかない。
+『認証』をひとつとっても「何をリソース」にするかを考えないといけない。
 
-振り返り、resourcesはパターンと言えて設計のしやすさと結びつく
-コレを基本のパターンとして、もっと小さなものや大きなもののパターンを実装するとすればもっと簡単になるのではないか？
+パターンとして、私達がよく認証機能を実装するときに使うDevisなどをみてみると
 
-また、resourcesというパターンを乗っているか
-特定のパターンを実装しているといえるならば、
+```
+GET    /users/sign_in devise/sessions#new
+POST   /users/sign_in devise/sessions#create
+DELETE /users/sign_in devise/sessions#destroy
+```
 
-## 認証　
+この例から、deviseはsessionsに対してnewしたりcreateしてる、つまりsessionsをリソースとしてみなしている
+実際にはsessionはモデルとしては存在しないしデータベースにも保存をしないようになっている。
 
-ログインのリソースをどうやって表現するのか？
-Deviseのを例にして見るとsessionという仮のリソースをを扱っている。
-つまり
+このあともtkawaさんは先に上げたモデリングしにくいリソースのパターンをauthlogickやkaminariといった有名なGemを紹介していた。
+このように、Railsのリソースパターンは同じ機能を提供している他のGemを参考にすることで解決することが多いように思った。リソースの名付けが難しい場合となにをリソースと見なすか？ということに集中することがRailsにおける開発の基本なのかもしれない。
 
-GET  /session
-PUT(POST) /session
-DELETE
-
-resource :user
-resource :session
-
-リソースがひとつしかない場合にはこのパターンが使える
-
-
-AuthlogicというGemもまたDBにレコードをもたいないがセッションをリソースとして扱いサインインサインアウトを実現している
-認証のための処理がモデルによるのでコントローラがとてもシンプルになる
-
-検索
-
-コントローラに
-Query Stringで検索のクエリを渡す
-Flilterdコレクションパターン
-
-クエリパターンで渡すようにする
-
-
-
+さらに詳しい情報はこちらのブログで綴られている。
+http://
 
 ## メモ
 tkawa
@@ -157,6 +143,34 @@ routesにはそれを書く場所になっているかもしれない
 認証
 ログイン・ログアウト
 どうやって表現するか？
+
+## 認証　
+
+ログインのリソースをどうやって表現するのか？
+Deviseのを例にして見るとsessionという仮のリソースをを扱っている。
+つまり
+
+GET  /session
+PUT(POST) /session
+DELETE
+
+resource :user
+resource :session
+
+リソースがひとつしかない場合にはこのパターンが使える
+
+
+AuthlogicというGemもまたDBにレコードをもたいないがセッションをリソースとして扱いサインインサインアウトを実現している
+認証のための処理がモデルによるのでコントローラがとてもシンプルになる
+
+検索
+
+コントローラに
+Query Stringで検索のクエリを渡す
+Flilterdコレクションパターン
+
+クエリパターンで渡すようにする
+
 Devise
 sessions#create
 sessions#destroy
