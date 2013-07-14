@@ -13,70 +13,69 @@ http://www.ustream.tv/recorded/33609885
 多くの人が使っているRailsはRESTfulな設計、開発ができるように開発されています。
 そのRailsをよりRESTfulに扱うために7つのパターンを記載しているブログをもとにその中から、いくつか私達がよく使うパターンについて発表されました。
 
-## Railsを使うこと
-RailsはRESTfulなフレームワークであると、DHHが7年前に言っていた。
-たとえばどういうところがRESTfulであるかというと
+## RailsはRESTfulである
+
+RailsはRESTfulなフレームワークであると、DHHが7年前に言っていました。
+RailsでどういうところがRESTfulであるかというと
 
 ```
+# config/routes.rb
 resources :users
 ```
 
-と書くことによってCRUDに必要なものができてくる
+と1行だけ書くことによってCRUDに必要なものが用意されることは、日頃からRailsでWebアプリケーションを書いている人はすぐにわかると思います。
+このCRUDを表にすると以下のようになります。
 
-
-| resource | GET | POST | PUT | DELETE |
+| - | GET | POST | PUT | DELETE |
 | --- |--- |--- | --- | --- |
-| /users | users#index | users#create  | - | - |
-| /users/:id  | users#show | - | users#update | users#destroy |
+| /users | index | create  | - | - |
+| /users/:id  | show | - | update | destroy |
 
-Railsを使う時点で私達が重要視しなければならないことは、その設計がRESTfulであるか？ということだと思います。
-その中でパターンにできるほど良く使うものを紹介されていました。
 
 ## RESTfulにするメリット
 
-RESTfulな設計にすることでどういうメリットがあるか？
+RESTfulな設計にすることでいくつかのメリットを享受することができます。
 
 * 一貫性がとれる
 * 簡単
 * HTTPのメリットに乗れる
 
-ということが一般的に言える。
-それはRailsでも同じで、同じことを開発者に強いるので理解がしやすい。誰が設計をしても同じようになる。
-Railsにうまく乗っかることができればRailsエンジニアはリソースの名前を決めるだけでいいことになる。
+ということが言えます。
+それはRailsでも同じで、同じことを開発者に強いるので理解がしやすく、設計をしても誰がやっても同じような設計ができあがります。
+tkawaさんの発表の中で幾つかのRESTfulのパターンを紹介されていましたが、このレポートではその中から「認証」について紹介したいと思います。
 
-
-2006年に発表していからそんなに単純でよいのか？と言われていたが、今日でもRailsはresouces を採用していることから、resourcesはよいものということ。
-
-
-同じくDHHは「制約が自由をもたらす」と言っていた。とてもいい言葉だが、その制約でもやはり難しいものがある。
-それは
-
-* 認証
-* 検索
-* 状態経か
-* 手続き的
-* リスト
-* ウィザード系の画面
-
-こういうのをどうやってresources で表現するのは今までに述べたものでは一筋縄ではいかない。
-『認証』をひとつとっても「何をリソース」にするかを考えないといけない。
-
-パターンとして、私達がよく認証機能を実装するときに使うDevisなどをみてみると
+認証をするときのURLやリソースはなんでしょうか？例えば、私達がよく認証機能を実装するときに使うDeviseをひとつの例としてみてみると
 
 ```
 GET    /users/sign_in devise/sessions#new
 POST   /users/sign_in devise/sessions#create
 DELETE /users/sign_in devise/sessions#destroy
+# snip
 ```
 
-この例から、deviseはsessionsに対してnewしたりcreateしてる、つまりsessionsをリソースとしてみなしている
-実際にはsessionはモデルとしては存在しないしデータベースにも保存をしないようになっている。
+この例からDeviseはsessionに対してnewしたりcreateしていることがわかります。つまりsessionをリソースとしていみなしていて、ここで注目したいのは、実際にはsessionはモデルとしては存在しないし、データベースにも保存をしないようになっていません。
 
-このあともtkawaさんは先に上げたモデリングしにくいリソースのパターンをauthlogickやkaminariといった有名なGemを紹介していた。
-このように、Railsのリソースパターンは同じ機能を提供している他のGemを参考にすることで解決することが多いように思った。リソースの名付けが難しい場合となにをリソースと見なすか？ということに集中することがRailsにおける開発の基本なのかもしれない。
+つまり単一のリソースに対してのCRUDなので、Railsで表現するならば
 
-さらに詳しい情報はこちらのブログで綴られている。
-http://
+``` 
+# config/routes.rb
+resource :session
+```
+
+と書くことによって
+
+| - | GET | POST | PUT | DELETE |
+| --- |--- |--- | --- | --- |
+| /session  | show | create | update | destroy |
+
+と、表現できます。なにをリソースとするのかを考えることによって、自然なURLが生成されましたね。
+
+このあともtkawaさんはauthlogickやkaminariといった有名なGemがどういうRESTfulなパターンを持っているのかを紹介していました。
+
+このように、RailsのRESTfulなパターンは他のGemを参考にすることで解決することが多いように思いました。認証の例でもありましたが、リソースの名付けが難しい場合時にはなにをリソースと見なすか？ということに焦点を当てるとRailsにおける開発の基本なのかもしれませんね。
+
+このレポートで紹介しきれなかった他のパターンについては[こちらのブログ](http://rest-pattern.hatenablog.com/)で綴られています。[tkawaさんのスライド](http://www.slideshare.net/tkawa1/rubykaigi2013-rails-gems-realize-restful-modeling-patterns)と合わせて読んでみてはどうでしょう？
+
 
 ## メモ
 tkawa
